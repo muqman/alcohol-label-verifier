@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { fileKey, parseManifest, resultsToCsv, TEMPLATE_CSV, type BatchOutcome, type Manifest } from '../batch/manifest';
+import { fileKey, parseManifest, resultsToCsv, resultsToTsv, TEMPLATE_CSV, type BatchOutcome, type Manifest } from '../batch/manifest';
 import type { LabelCheck } from '../core/checkLabel';
 import { EMPTY_APPLICATION, FIELD_LABELS, type ApplicationData, type Verdict } from '../domain/types';
 import { ImageError } from '../ocr/browser/decode';
@@ -127,7 +127,7 @@ export function BatchCheck({ service, engines }: Props) {
 
   // Some locked-down browsers block downloads; pasting into Excel always works.
   async function copyResults() {
-    const tsv = resultsToCsv(results);
+    const tsv = resultsToTsv(results);
     try {
       await navigator.clipboard.writeText(tsv);
       setCopied(true);

@@ -102,14 +102,21 @@ export interface BatchOutcome {
 const WORDS: Record<string, string> = { match: 'Match', review: 'Check', mismatch: 'Mismatch', missing: 'Not found', skipped: 'Not checked' };
 const VERDICT_WORDS: Record<string, string> = { pass: 'All checks passed', review: 'Needs review', fail: 'Problems found', error: 'Could not check' };
 
-export function resultsToCsv(outcomes: BatchOutcome[]): string {
+function resultRows(outcomes: BatchOutcome[]): string[][] {
   const header = ['application_id', 'image_files', 'result', ...FIELD_ORDER.map((k) => FIELD_LABELS[k].toLowerCase().replace(/[^a-z]+/g, '_')), 'issues', 'seconds'];
-  const lines = outcomes.map((o) => {
+  const rows = outcomes.map((o) => {
     const byKey = new Map(o.fields.map((f) => [f.key, f]));
     const issues = o.error ?? o.fields.filter((f) => f.status !== 'match' && f.status !== 'skipped').map((f) => `${FIELD_LABELS[f.key]}: ${f.message}`).join(' | ');
-    return [o.id, o.images.join(';'), VERDICT_WORDS[o.verdict], ...FIELD_ORDER.map((k) => WORDS[byKey.get(k)?.status ?? 'skipped']), issues, o.seconds.toFixed(1)]
-      .map((v) => cell(String(v)))
-      .join(',');
+    return [o.id, o.images.join(';'), VERDICT_WORDS[o.verdict], ...FIELD_ORDER.map((k) => WORDS[byKey.get(k)?.status ?? 'skipped']), issues, o.seconds.toFixed(1)];
   });
-  return [header.join(','), ...lines].join('\n') + '\n';
+  return [header, ...rows];
+}
+
+export function resultsToCsv(outcomes: BatchOutcome[]): string {
+  return resultRows(outcomes).map((r) => r.map((v) => cell(String(v))).join(',')).join('\n') + '\n';
+}
+
+/** Tab-separated, which spreadsheets split into columns on paste. */
+export function resultsToTsv(outcomes: BatchOutcome[]): string {
+  return resultRows(outcomes).map((r) => r.map((v) => String(v).replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\n') + '\n';
 }
