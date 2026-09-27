@@ -79,7 +79,13 @@ npm run dev          # http://localhost:5173
 
 The same workflow also runs the accuracy evaluation and the browser end-to-end test in a separate job, so they never block a deployment.
 
-**Anywhere else:** run `npm run build` and upload `dist/` (Azure Static Web Apps, Netlify, Vercel, S3, an internal web server). Asset paths are relative, so any sub-path works.
+**Anywhere else:** run `npm run build` and upload `dist/`. Asset paths are relative, so any sub-path works. Configuration for common hosts is included:
+
+| Host | Included file | What it does |
+| --- | --- | --- |
+| Azure Static Web Apps | `staticwebapp.config.json` | MIME types for `.onnx`/`.wasm`, plus cross-origin isolation headers (enables WebAssembly threads) |
+| IIS / Azure App Service on Windows | `web.config` | IIS refuses unknown file types such as `.onnx`, `.gz` and `.mjs` by default; this maps them, and adds the same headers |
+| Netlify, Cloudflare Pages | `_headers` | Cross-origin isolation headers |
 
 ## How it works
 

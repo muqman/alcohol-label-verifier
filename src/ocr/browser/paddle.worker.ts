@@ -5,6 +5,7 @@ import * as ort from 'onnxruntime-web/wasm';
 import { detectPhase, recognizePhase, type Detection, type PaddleModels } from '../paddle/pipeline';
 import { parseDictionary } from '../paddle/recognize';
 import type { Box, OcrWord } from '../types';
+import { fetchBinary } from './fetchBinary';
 
 export type PaddleRequest =
   | { type: 'init'; ortBase: string; modelBase: string }
@@ -23,19 +24,14 @@ const scope = self as unknown as DedicatedWorkerGlobalScope;
 let models: PaddleModels | null = null;
 const detections = new Map<number, Promise<Detection>>();
 
-async function fetchBytes(url: string): Promise<Uint8Array> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Could not load ${url} (${res.status})`);
-  return new Uint8Array(await res.arrayBuffer());
-}
 
 async function init(ortBase: string, modelBase: string) {
   ort.env.wasm.wasmPaths = ortBase;
   ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
   const opts: ort.InferenceSession.SessionOptions = { executionProviders: ['wasm'], graphOptimizationLevel: 'all' };
   const [det, rec, dictText] = await Promise.all([
-    fetchBytes(`${modelBase}en_PP-OCRv3_det_infer.onnx`),
-    fetchBytes(`${modelBase}en_PP-OCRv4_rec.onnx`),
+    fetchBinary(`${modelBase}en_PP-OCRv3_det_infer.onnx`),
+    fetchBinary(`${modelBase}en_PP-OCRv4_rec.onnx`),
     fetch(`${modelBase}en_dict.txt`).then((r) => r.text()),
   ]);
   models = {
