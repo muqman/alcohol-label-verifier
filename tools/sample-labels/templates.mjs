@@ -248,6 +248,65 @@ const designs = {
   }),
 };
 
+// --- Designs used only by the held-out evaluation set (holdout.mjs) --------
+Object.assign(designs, {
+  'whiskey-dark': (l) => ({
+    css: `
+      .label{background:radial-gradient(ellipse at 50% 30%,#2a2521 0%,#12100e 80%);color:#efe4cc;padding:60px 64px;display:flex;flex-direction:column;align-items:center;text-align:center}
+      .top{font:400 22px 'Libre Baskerville';letter-spacing:8px;color:#c9a96b}
+      .brand0{font:700 88px/1.05 'Libre Baskerville';margin-top:40px;letter-spacing:1px}
+      .brand1{font:italic 400 40px 'Libre Baskerville';margin-top:6px;color:#c9a96b}
+      .rule{width:60%;border-top:1px solid #c9a96b;margin:34px 0}
+      .class{font:400 36px/1.25 'Libre Baskerville';text-transform:uppercase;letter-spacing:4px}
+      .row{display:flex;gap:60px;font:400 30px 'Libre Baskerville';margin-top:44px}
+      .bottler{font:400 20px/1.5 'Libre Baskerville';margin-top:36px;color:#d9cdb3;max-width:80%}
+      .warning{font:400 15px/1.35 'Arimo';text-align:left;margin-top:auto;color:#efe4cc;text-transform:uppercase}`,
+    html: `<div class="top">SINGLE BARREL</div>
+      ${brandLines(l.brand).map((b, i) => `<div class="brand${i}">${esc(b)}</div>`).join('')}
+      <div class="rule"></div>
+      <div class="class">${esc(l.classType)}</div>
+      <div class="row"><span>${esc(l.abv)}</span><span>${esc(l.net)}</span></div>
+      <div class="bottler">${esc(l.bottler)}</div>
+      ${warningHtml(l.warning)}`,
+  }),
+
+  'wine-vertical': (l) => ({
+    css: `
+      .label{background:#ffffff;color:#1d1d1f;padding:70px 150px 70px 70px;display:flex;flex-direction:column;align-items:center;text-align:center;border:1px solid #ddd}
+      .brand0{font:400 84px/1.1 'Playfair Display';margin-top:60px}
+      .class{font:500 34px 'Montserrat';letter-spacing:12px;margin-top:40px;text-transform:uppercase}
+      .region{font:italic 400 30px 'EB Garamond';margin-top:18px;color:#6b6b6b}
+      .row{display:flex;gap:50px;font:500 28px 'Montserrat';margin-top:auto}
+      .country{font:600 24px 'Montserrat';letter-spacing:6px;margin-top:20px;text-transform:uppercase}
+      .bottler{font:400 20px 'Montserrat';margin-top:16px}
+      .side{position:absolute;right:28px;top:60px;width:90px;height:calc(100% - 120px)}
+      .side .warning{position:absolute;left:50%;top:50%;width:980px;transform:translate(-50%,-50%) rotate(90deg);font:400 16px/1.3 'Arimo';text-align:left}`,
+    html: `${brandLines(l.brand).map((b, i) => `<div class="brand${i}">${esc(b)}</div>`).join('')}
+      <div class="class">${esc(l.classType)}</div>
+      <div class="region">Willamette Valley</div>
+      <div class="row"><span>${esc(l.abv)}</span><span>${esc(l.net)}</span></div>
+      ${l.country ? `<div class="country">${esc(l.country)}</div>` : ''}
+      <div class="bottler">${esc(l.bottler)}</div>
+      <div class="side">${warningHtml(l.warning)}</div>`,
+  }),
+
+  'cider-can': (l) => ({
+    css: `
+      .label{background:linear-gradient(135deg,#fde2e4 0%,#fad2a8 100%);color:#3d1f2b;padding:56px 60px;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px}
+      .brand0{font:800 110px/1 'Montserrat';letter-spacing:-2px;color:#b23a48}
+      .class{font:600 40px 'Montserrat';margin-top:10px}
+      .apple{justify-self:center;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e76f51,#9d2235);margin:30px 0;align-self:center}
+      .cols{display:grid;grid-template-columns:1fr 1.4fr;gap:28px;align-items:start}
+      .facts{font:600 30px/1.5 'Montserrat'}
+      .bottler{font:400 18px/1.4 'Montserrat';margin-top:12px}
+      .warning{font:400 14px/1.35 'Arimo';text-align:left;border-left:3px solid #b23a48;padding-left:14px}`,
+    html: `${brandLines(l.brand).map((b, i) => `<div class="brand${i}">${esc(b)}</div>`).join('')}
+      <div class="class">${esc(l.classType)}</div>
+      <div class="apple"></div>
+      <div class="cols"><div><div class="facts">${esc(l.abv)}<br>${esc(l.net)}</div><div class="bottler">${esc(l.bottler)}</div></div>${warningHtml(l.warning)}</div>`,
+  }),
+});
+
 export function renderLabelDocument(template, label, [width, height]) {
   const d = designs[template];
   if (!d) throw new Error(`Unknown template ${template}`);

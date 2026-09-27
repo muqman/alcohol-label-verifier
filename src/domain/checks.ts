@@ -13,14 +13,24 @@ const CONFIDENT = 0.85;
 const quote = (s: string) => `“${tidy(s)}”`;
 
 /** Grade a fuzzy text match. */
-function gradeText(c: Candidate | null): FieldStatus {
+function gradeText(c: Candidate | null, expected?: string): FieldStatus {
   if (!c) return 'missing';
   const sim = c.hit.similarity;
   if (sim >= 0.999 || c.confusableOnly) return 'match';
   if (sim >= 0.9) return 'review';
   if (sim >= 0.7) return c.conf >= CONFIDENT ? 'mismatch' : 'review';
+  // A looser match that shares a real word ("Straight Rye Whiskey" vs
+  // "Straight Bourbon Whiskey") is the same kind of statement saying something
+  // else: report what the label says rather than "not found".
+  if (expected && sim >= 0.5 && c.conf >= CONFIDENT && sharesWord(expected, candidateLineText(c))) return 'mismatch';
   return 'missing';
 }
+
+const words = (s: string) => new Set(fold(s).toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 4));
+const sharesWord = (a: string, b: string) => {
+  const wb = words(b);
+  return [...words(a)].some((w) => wb.has(w));
+};
 
 function textMessage(status: FieldStatus, expected: string, c: Candidate | null, what: string): string {
   switch (status) {
@@ -107,7 +117,7 @@ export function checkClassType(app: ApplicationData, streams: Stream[]): FieldRe
     const hit = findBest(p, streams);
     if (hit && (!c || hit.hit.similarity > c.hit.similarity)) c = hit;
   }
-  const status = gradeText(c);
+  const status = gradeText(c, expected);
   return {
     ...base,
     status,

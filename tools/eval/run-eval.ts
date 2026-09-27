@@ -3,6 +3,7 @@
 //   npm run eval                 # all cases
 //   npm run eval -- old-tom      # cases whose id contains "old-tom"
 //   npm run eval -- --verbose    # also print what was read
+//   npm run eval -- --holdout    # the held-out set in test-data/holdout
 //
 // A case FAILS if the overall verdict is not the expected one (or one of the
 // accepted alternatives), or if an asserted field has the wrong status.
@@ -24,9 +25,10 @@ interface Case {
 const root = path.resolve(import.meta.dirname, '../..');
 const args = process.argv.slice(2);
 const verbose = args.includes('--verbose');
+const dir = args.includes('--holdout') ? 'test-data/holdout' : 'public/samples';
 const filter = args.filter((a) => !a.startsWith('--'));
 
-const cases: Case[] = JSON.parse(await readFile(path.join(root, 'public/samples/cases.json'), 'utf8'));
+const cases: Case[] = JSON.parse(await readFile(path.join(root, dir, 'cases.json'), 'utf8'));
 const selected = cases.filter((c) => !filter.length || filter.some((f) => c.id.includes(f)));
 
 const icon: Record<string, string> = { match: '✓', review: '?', mismatch: '✗', missing: '∅', skipped: '-' };
@@ -34,7 +36,7 @@ let failures = 0;
 const times: number[] = [];
 
 for (const c of selected) {
-  const images = await Promise.all(c.images.map((f) => loadImage(path.join(root, 'public/samples', f))));
+  const images = await Promise.all(c.images.map((f) => loadImage(path.join(root, dir, f))));
   const { result, secondLook, ms, readings } = await checkLabel(c.application, images, nodeBackends);
   times.push(ms);
   const okVerdict = result.verdict === c.expected.overall || c.accept.includes(result.verdict);

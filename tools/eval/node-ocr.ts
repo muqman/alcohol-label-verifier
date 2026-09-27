@@ -18,7 +18,7 @@ const root = path.resolve(import.meta.dirname, '../..');
 
 /** Decode (respecting EXIF orientation) and scale to the working size. */
 export async function loadImage(file: string): Promise<RgbaImage> {
-  const { data, info } = await sharp(file).rotate().ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp(file).rotate().flatten({ background: '#ffffff' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const img = { width: info.width, height: info.height, data: new Uint8ClampedArray(data.buffer, data.byteOffset, data.length) };
   const size = workingSize(img.width, img.height);
   return size.scale === 1 ? img : resize(img, size.width, size.height);

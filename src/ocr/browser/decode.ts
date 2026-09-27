@@ -33,6 +33,9 @@ export async function decodeImage(file: Blob, name = (file as File).name ?? 'lab
     const ctx = c.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
     if (!ctx) throw new ImageError('This browser cannot process images (no canvas support).');
     ctx.imageSmoothingQuality = 'high';
+    // Transparent PNG artwork: put it on white, or transparent areas read as black.
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size.width, size.height);
     ctx.drawImage(bitmap, 0, 0, size.width, size.height);
     const data = ctx.getImageData(0, 0, size.width, size.height);
     return { name, url: URL.createObjectURL(file), pixels: { width: data.width, height: data.height, data: data.data } };

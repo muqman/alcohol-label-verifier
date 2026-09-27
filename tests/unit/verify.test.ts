@@ -62,6 +62,12 @@ describe('class / type', () => {
     const r = run(GOOD_LABEL, { classType: 'Kentucky Straight Bourbon Whisky' });
     expect(status(r, 'classType')).toBe('match');
   });
+  it('says what the label shows when the designation differs', () => {
+    const lines = replaceLine('Kentucky Straight Bourbon', { text: 'Straight Bourbon', h: 44 });
+    const r = run(lines, { classType: 'Straight Rye Whiskey' });
+    expect(status(r, 'classType')).toBe('mismatch');
+    expect(field(r, 'classType').found).toMatch(/Bourbon/);
+  });
   it('reports a different class', () => {
     const r = run(GOOD_LABEL, { classType: 'Tennessee Whiskey' });
     expect(['mismatch', 'missing', 'review']).toContain(status(r, 'classType'));

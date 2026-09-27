@@ -1,0 +1,328 @@
+[
+  {
+    "id": "h-ridgeline-rye",
+    "title": "Rye — dark label, warning all in capitals",
+    "featured": false,
+    "images": [
+      "h-ridgeline-rye.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Ridgeline Distilling Company",
+      "classType": "Straight Rye Whiskey",
+      "alcoholContent": "50%",
+      "netContents": "750 mL",
+      "bottler": "Ridgeline Distilling Company, Lexington, Kentucky",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "h-ridgeline-wrong-class",
+    "title": "Rye — class/type differs",
+    "featured": false,
+    "images": [
+      "h-ridgeline-wrong-class.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Ridgeline Distilling Company",
+      "classType": "Straight Rye Whiskey",
+      "alcoholContent": "50%",
+      "netContents": "750 mL",
+      "bottler": "Ridgeline Distilling Company, Lexington, Kentucky",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {
+        "classType": "mismatch"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "h-ridgeline-proof",
+    "title": "Rye — proof does not equal 2 x ABV",
+    "featured": false,
+    "images": [
+      "h-ridgeline-proof.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Ridgeline Distilling Company",
+      "classType": "Straight Rye Whiskey",
+      "alcoholContent": "50%",
+      "netContents": "750 mL",
+      "bottler": "Ridgeline Distilling Company, Lexington, Kentucky",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "review",
+      "fields": {
+        "alcoholContent": "review"
+      }
+    },
+    "accept": [
+      "fail"
+    ]
+  },
+  {
+    "id": "h-ridgeline-photo",
+    "title": "Rye — bottle photo with glare",
+    "featured": false,
+    "images": [
+      "h-ridgeline-photo.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Ridgeline Distilling Company",
+      "classType": "Straight Rye Whiskey",
+      "alcoholContent": "50%",
+      "netContents": "750 mL",
+      "bottler": "Ridgeline Distilling Company, Lexington, Kentucky",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {}
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "h-willow-pinot",
+    "title": "Pinot noir — warning printed sideways",
+    "featured": false,
+    "images": [
+      "h-willow-pinot.jpg"
+    ],
+    "application": {
+      "beverageType": "wine",
+      "brandName": "Willow Creek",
+      "classType": "Pinot Noir",
+      "alcoholContent": "13.9%",
+      "netContents": "750 mL",
+      "bottler": "Willow Creek Cellars, Dundee, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "h-willow-not-bold",
+    "title": "Pinot noir — sideways warning, heading not bold",
+    "featured": false,
+    "images": [
+      "h-willow-not-bold.jpg"
+    ],
+    "application": {
+      "beverageType": "wine",
+      "brandName": "Willow Creek",
+      "classType": "Pinot Noir",
+      "alcoholContent": "13.9%",
+      "netContents": "750 mL",
+      "bottler": "Willow Creek Cellars, Dundee, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "review",
+      "fields": {}
+    },
+    "accept": [
+      "fail"
+    ]
+  },
+  {
+    "id": "h-orchard-cider",
+    "title": "Cider — two-column layout",
+    "featured": false,
+    "images": [
+      "h-orchard-cider.jpg"
+    ],
+    "application": {
+      "beverageType": "wine",
+      "brandName": "Orchard Row",
+      "classType": "Hard Cider",
+      "alcoholContent": "8.5%",
+      "netContents": "355 mL",
+      "bottler": "Orchard Row Cider Works, Hood River, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "h-orchard-short-warning",
+    "title": "Cider — warning cut short",
+    "featured": false,
+    "images": [
+      "h-orchard-short-warning.jpg"
+    ],
+    "application": {
+      "beverageType": "wine",
+      "brandName": "Orchard Row",
+      "classType": "Hard Cider",
+      "alcoholContent": "8.5%",
+      "netContents": "355 mL",
+      "bottler": "Orchard Row Cider Works, Hood River, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {}
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "h-harbor-pilsner",
+    "title": "Pilsner — 16 FL OZ vs \"1 Pint\"",
+    "featured": false,
+    "images": [
+      "h-harbor-pilsner.jpg"
+    ],
+    "application": {
+      "beverageType": "beer",
+      "brandName": "Harbor Light",
+      "classType": "Pilsner",
+      "alcoholContent": "4.8%",
+      "netContents": "1 Pint",
+      "bottler": "Harbor Light Brewing, Portland, Maine",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "h-harbor-angle",
+    "title": "Pilsner — angled photo, no ABV in application",
+    "featured": false,
+    "images": [
+      "h-harbor-angle.jpg"
+    ],
+    "application": {
+      "beverageType": "beer",
+      "brandName": "Harbor Light",
+      "classType": "Pilsner",
+      "alcoholContent": "",
+      "netContents": "1 Pint",
+      "bottler": "Harbor Light Brewing, Portland, Maine",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "alcoholContent": "skipped"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "h-loch-varra",
+    "title": "Scotch import — liters, country of origin",
+    "featured": false,
+    "images": [
+      "h-loch-varra.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Loch Varra",
+      "classType": "Blended Scotch Whisky",
+      "alcoholContent": "40% Alc./Vol.",
+      "netContents": "1 Liter",
+      "bottler": "Caledonia Imports LLC, Chicago, Illinois",
+      "countryOfOrigin": "Scotland"
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match",
+        "countryOfOrigin": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "h-loch-varra-wrong-country",
+    "title": "Scotch import — application says Ireland",
+    "featured": false,
+    "images": [
+      "h-loch-varra-wrong-country.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Loch Varra",
+      "classType": "Blended Scotch Whisky",
+      "alcoholContent": "40% Alc./Vol.",
+      "netContents": "1 Liter",
+      "bottler": "Caledonia Imports LLC, Chicago, Illinois",
+      "countryOfOrigin": "Ireland"
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {
+        "countryOfOrigin": "missing"
+      }
+    },
+    "accept": []
+  }
+]

@@ -6,7 +6,10 @@ import { dist, type Quad } from './geometry';
 type Ort = typeof ortTypes;
 
 const REC_H = 48;
-const MAX_RATIO = 80; // cap on width/height of a single text line crop
+// Very long lines (the health warning) are squeezed horizontally to at most
+// 22x their height. PaddleOCR trains its recogniser on squeezed lines, so
+// accuracy holds while recognition time (linear in width) drops by ~40%.
+const MAX_RATIO = 22;
 const MAX_BATCH = 8;
 
 export interface RecResult {

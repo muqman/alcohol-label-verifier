@@ -1,6 +1,7 @@
 // Renders the sample/test labels defined in specs.mjs.
 //
-//   npm run samples
+//   npm run samples                 # the examples shipped with the app
+//   npm run samples -- --holdout    # held-out evaluation set (test-data/holdout)
 //
 // Output (committed to the repo so nobody needs to run this):
 //   public/samples/*.jpg            label images
@@ -11,10 +12,13 @@ import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { CASES } from './specs.mjs';
+import { HOLDOUT } from './holdout.mjs';
 import { renderLabelDocument } from './templates.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const outDir = path.resolve(here, '../../public/samples');
+const holdout = process.argv.includes('--holdout');
+const outDir = path.resolve(here, holdout ? '../../test-data/holdout' : '../../public/samples');
+const SPECS = holdout ? HOLDOUT : CASES;
 const renderDir = path.resolve(here, '.render');
 
 const csvCell = (v) => {
@@ -33,7 +37,7 @@ async function main() {
   await photoPage.goto(pathToFileURL(path.join(here, 'photo.html')).href);
 
   const answerKey = [];
-  for (const c of CASES) {
+  for (const c of SPECS) {
     const images = c.images ?? [{ suffix: null, template: c.template, label: c.label, size: c.size }];
     const files = [];
     for (const img of images) {
@@ -72,6 +76,11 @@ async function main() {
   await browser.close();
 
   await writeFile(path.join(outDir, 'cases.json'), JSON.stringify(answerKey, null, 2) + '\n');
+  if (holdout) {
+    await rm(renderDir, { recursive: true, force: true });
+    console.log(`\n${answerKey.length} held-out cases written to ${path.relative(process.cwd(), outDir)}`);
+    return;
+  }
 
   const header = ['application_id', 'image_files', 'beverage_type', 'brand_name', 'class_type', 'alcohol_content', 'net_contents', 'bottler_name_address', 'country_of_origin'];
   const rows = answerKey.map((c, i) => [
