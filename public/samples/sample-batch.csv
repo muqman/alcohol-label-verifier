@@ -1,0 +1,21 @@
+application_id,image_files,beverage_type,brand_name,class_type,alcohol_content,net_contents,bottler_name_address,country_of_origin
+SAMPLE-001,old-tom-bourbon.jpg,spirits,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Bardstown, Kentucky",
+SAMPLE-002,stones-throw-gin.jpg,spirits,Stone's Throw,London Dry Gin,47%,750 mL,"Stone's Throw Spirits Co., Portland, Oregon",
+SAMPLE-003,hoppy-trails-ipa.jpg,beer,Hoppy Trails,India Pale Ale,6.8% ABV,12 fl oz,"Hoppy Trails Brewing Co., Bend, Oregon",
+SAMPLE-004,agave-azul-tequila.jpg,spirits,Agave Azul,Tequila Blanco,40%,750 mL,"Azul Imports LLC, San Antonio, Texas",Mexico
+SAMPLE-005,"belle-rive-wine-front.jpg;belle-rive-wine-back.jpg",wine,Chateau Belle Rive,Cabernet Sauvignon,13.5%,750 mL,"Belle Rive Imports, New York, New York",France
+SAMPLE-006,north-star-vodka.jpg,spirits,North Star,Vodka,40% Alc./Vol.,1 Liter,"North Star Spirits, Minneapolis, Minnesota",
+SAMPLE-007,old-tom-wrong-abv.jpg,spirits,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Bardstown, Kentucky",
+SAMPLE-008,stones-throw-titlecase-warning.jpg,spirits,Stone's Throw,London Dry Gin,47%,750 mL,"Stone's Throw Spirits Co., Portland, Oregon",
+SAMPLE-009,hoppy-trails-altered-warning.jpg,beer,Hoppy Trails,India Pale Ale,6.8% ABV,12 fl oz,"Hoppy Trails Brewing Co., Bend, Oregon",
+SAMPLE-010,north-star-warning-not-bold.jpg,spirits,North Star,Vodka,40% Alc./Vol.,1 Liter,"North Star Spirits, Minneapolis, Minnesota",
+SAMPLE-011,island-breeze-no-warning.jpg,spirits,Island Breeze,Spiced Rum,35%,750 mL,"Island Breeze Rum Co., Key West, Florida",
+SAMPLE-012,glen-ardra-wrong-net.jpg,spirits,Glen Ardra,Single Malt Scotch Whisky,43%,750 mL,"Highland Imports Inc., Boston, Massachusetts",Scotland
+SAMPLE-013,agave-azul-no-country.jpg,spirits,Agave Azul,Tequila Blanco,40%,750 mL,"Azul Imports LLC, San Antonio, Texas",Mexico
+SAMPLE-014,old-tom-brand-mismatch.jpg,spirits,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Bardstown, Kentucky",
+SAMPLE-015,old-tom-bottle-photo.jpg,spirits,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Bardstown, Kentucky",
+SAMPLE-016,hoppy-trails-angle.jpg,beer,Hoppy Trails,India Pale Ale,6.8% ABV,12 fl oz,"Hoppy Trails Brewing Co., Bend, Oregon",
+SAMPLE-017,stones-throw-glare.jpg,spirits,Stone's Throw,London Dry Gin,47%,750 mL,"Stone's Throw Spirits Co., Portland, Oregon",
+SAMPLE-018,glen-ardra-blurry.jpg,spirits,Glen Ardra,Single Malt Scotch Whisky,43%,750 mL,"Highland Imports Inc., Boston, Massachusetts",Scotland
+SAMPLE-019,agave-azul-sideways.jpg,spirits,Agave Azul,Tequila Blanco,40%,750 mL,"Azul Imports LLC, San Antonio, Texas",Mexico
+SAMPLE-020,island-breeze-small.jpg,spirits,Island Breeze,Spiced Rum,35%,750 mL,"Island Breeze Rum Co., Key West, Florida",

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+public/ocr-runtime/
+tools/sample-labels/.render/
+test-results/
+*.log
+.DS_Store
+.vite/
+coverage/
+tools/.scratch/

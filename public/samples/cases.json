@@ -1,0 +1,593 @@
+[
+  {
+    "id": "old-tom-bourbon",
+    "title": "Bourbon — everything correct",
+    "note": "The example from the brief. Every field should match.",
+    "featured": true,
+    "images": [
+      "old-tom-bourbon.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "OLD TOM DISTILLERY",
+      "classType": "Kentucky Straight Bourbon Whiskey",
+      "alcoholContent": "45% Alc./Vol. (90 Proof)",
+      "netContents": "750 mL",
+      "bottler": "Old Tom Distillery, Bardstown, Kentucky",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "stones-throw-gin",
+    "title": "Gin — brand in different capitalization",
+    "note": "Label says STONE'S THROW, application says Stone's Throw (Dave's example). Should be treated as a match, with a note.",
+    "featured": true,
+    "images": [
+      "stones-throw-gin.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Stone's Throw",
+      "classType": "London Dry Gin",
+      "alcoholContent": "47%",
+      "netContents": "750 mL",
+      "bottler": "Stone's Throw Spirits Co., Portland, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "hoppy-trails-ipa",
+    "title": "Beer — U.S. units (12 FL OZ)",
+    "note": "Malt beverage; net contents in fluid ounces; state abbreviation (OR) vs full name (Oregon).",
+    "featured": false,
+    "images": [
+      "hoppy-trails-ipa.jpg"
+    ],
+    "application": {
+      "beverageType": "beer",
+      "brandName": "Hoppy Trails",
+      "classType": "India Pale Ale",
+      "alcoholContent": "6.8% ABV",
+      "netContents": "12 fl oz",
+      "bottler": "Hoppy Trails Brewing Co., Bend, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "agave-azul-tequila",
+    "title": "Imported tequila — country of origin",
+    "note": "Imported spirit; country of origin must appear.",
+    "featured": false,
+    "images": [
+      "agave-azul-tequila.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Agave Azul",
+      "classType": "Tequila Blanco",
+      "alcoholContent": "40%",
+      "netContents": "750 mL",
+      "bottler": "Azul Imports LLC, San Antonio, Texas",
+      "countryOfOrigin": "Mexico"
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match",
+        "countryOfOrigin": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "belle-rive-wine",
+    "title": "Imported wine — front + back label",
+    "note": "Two images for one application: brand/class/ABV on the front, warning and importer on the back. Brand uses a script font.",
+    "featured": false,
+    "images": [
+      "belle-rive-wine-front.jpg",
+      "belle-rive-wine-back.jpg"
+    ],
+    "application": {
+      "beverageType": "wine",
+      "brandName": "Chateau Belle Rive",
+      "classType": "Cabernet Sauvignon",
+      "alcoholContent": "13.5%",
+      "netContents": "750 mL",
+      "bottler": "Belle Rive Imports, New York, New York",
+      "countryOfOrigin": "France"
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match",
+        "countryOfOrigin": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "north-star-vodka",
+    "title": "Vodka — thin display font, liters",
+    "note": "\"1 L\" on the label vs \"1 Liter\" in the application.",
+    "featured": false,
+    "images": [
+      "north-star-vodka.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "North Star",
+      "classType": "Vodka",
+      "alcoholContent": "40% Alc./Vol.",
+      "netContents": "1 Liter",
+      "bottler": "North Star Spirits, Minneapolis, Minnesota",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "old-tom-wrong-abv",
+    "title": "Bourbon — wrong alcohol content",
+    "note": "Label says 40% (80 Proof); application says 45%.",
+    "featured": true,
+    "images": [
+      "old-tom-wrong-abv.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "OLD TOM DISTILLERY",
+      "classType": "Kentucky Straight Bourbon Whiskey",
+      "alcoholContent": "45% Alc./Vol. (90 Proof)",
+      "netContents": "750 mL",
+      "bottler": "Old Tom Distillery, Bardstown, Kentucky",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {
+        "alcoholContent": "mismatch",
+        "brandName": "match",
+        "warning": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "stones-throw-titlecase-warning",
+    "title": "Gin — \"Government Warning\" not in capitals",
+    "note": "Jenny's example: the header is written in title case instead of ALL CAPS.",
+    "featured": true,
+    "images": [
+      "stones-throw-titlecase-warning.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Stone's Throw",
+      "classType": "London Dry Gin",
+      "alcoholContent": "47%",
+      "netContents": "750 mL",
+      "bottler": "Stone's Throw Spirits Co., Portland, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {
+        "warning": "mismatch",
+        "brandName": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "hoppy-trails-altered-warning",
+    "title": "Beer — warning wording changed",
+    "note": "The warning says \"may impair\" instead of \"impairs\" and drops \"(1) According to the Surgeon General,\".",
+    "featured": false,
+    "images": [
+      "hoppy-trails-altered-warning.jpg"
+    ],
+    "application": {
+      "beverageType": "beer",
+      "brandName": "Hoppy Trails",
+      "classType": "India Pale Ale",
+      "alcoholContent": "6.8% ABV",
+      "netContents": "12 fl oz",
+      "bottler": "Hoppy Trails Brewing Co., Bend, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {
+        "warning": "mismatch"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "north-star-warning-not-bold",
+    "title": "Vodka — warning header not bold",
+    "note": "GOVERNMENT WARNING: is in capitals but set in regular weight, like the rest of the statement.",
+    "featured": false,
+    "images": [
+      "north-star-warning-not-bold.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "North Star",
+      "classType": "Vodka",
+      "alcoholContent": "40% Alc./Vol.",
+      "netContents": "1 Liter",
+      "bottler": "North Star Spirits, Minneapolis, Minnesota",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "review",
+      "fields": {
+        "warning": "review"
+      }
+    },
+    "accept": [
+      "fail"
+    ]
+  },
+  {
+    "id": "island-breeze-no-warning",
+    "title": "Rum — government warning missing",
+    "note": "No health warning statement anywhere on the label.",
+    "featured": true,
+    "images": [
+      "island-breeze-no-warning.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Island Breeze",
+      "classType": "Spiced Rum",
+      "alcoholContent": "35%",
+      "netContents": "750 mL",
+      "bottler": "Island Breeze Rum Co., Key West, Florida",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {
+        "warning": "missing",
+        "brandName": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "glen-ardra-wrong-net",
+    "title": "Scotch — wrong net contents",
+    "note": "Label says 700 mL; application says 750 mL.",
+    "featured": false,
+    "images": [
+      "glen-ardra-wrong-net.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Glen Ardra",
+      "classType": "Single Malt Scotch Whisky",
+      "alcoholContent": "43%",
+      "netContents": "750 mL",
+      "bottler": "Highland Imports Inc., Boston, Massachusetts",
+      "countryOfOrigin": "Scotland"
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {
+        "netContents": "mismatch",
+        "countryOfOrigin": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "agave-azul-no-country",
+    "title": "Imported tequila — country of origin missing",
+    "note": "Application says imported from Mexico, but the label has no country of origin statement.",
+    "featured": false,
+    "images": [
+      "agave-azul-no-country.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Agave Azul",
+      "classType": "Tequila Blanco",
+      "alcoholContent": "40%",
+      "netContents": "750 mL",
+      "bottler": "Azul Imports LLC, San Antonio, Texas",
+      "countryOfOrigin": "Mexico"
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {
+        "countryOfOrigin": "missing",
+        "brandName": "match"
+      }
+    },
+    "accept": []
+  },
+  {
+    "id": "old-tom-brand-mismatch",
+    "title": "Bourbon — different brand name",
+    "note": "Label says OLD TOM DISTILLING CO.; application says OLD TOM DISTILLERY.",
+    "featured": false,
+    "images": [
+      "old-tom-brand-mismatch.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "OLD TOM DISTILLERY",
+      "classType": "Kentucky Straight Bourbon Whiskey",
+      "alcoholContent": "45% Alc./Vol. (90 Proof)",
+      "netContents": "750 mL",
+      "bottler": "Old Tom Distillery, Bardstown, Kentucky",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "fail",
+      "fields": {
+        "brandName": "mismatch"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "old-tom-bottle-photo",
+    "title": "Bourbon — photo of a curved bottle",
+    "note": "Label wrapped around a bottle: curvature, edge shading, slight tilt, a glare streak.",
+    "featured": true,
+    "images": [
+      "old-tom-bottle-photo.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "OLD TOM DISTILLERY",
+      "classType": "Kentucky Straight Bourbon Whiskey",
+      "alcoholContent": "45% Alc./Vol. (90 Proof)",
+      "netContents": "750 mL",
+      "bottler": "Old Tom Distillery, Bardstown, Kentucky",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "hoppy-trails-angle",
+    "title": "Beer — shot at an angle, dim light",
+    "note": "Perspective tilt of about 25°, underexposed.",
+    "featured": false,
+    "images": [
+      "hoppy-trails-angle.jpg"
+    ],
+    "application": {
+      "beverageType": "beer",
+      "brandName": "Hoppy Trails",
+      "classType": "India Pale Ale",
+      "alcoholContent": "6.8% ABV",
+      "netContents": "12 fl oz",
+      "bottler": "Hoppy Trails Brewing Co., Bend, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "stones-throw-glare",
+    "title": "Gin — heavy glare on the glass",
+    "note": "A bright reflection partly washes out the label.",
+    "featured": false,
+    "images": [
+      "stones-throw-glare.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Stone's Throw",
+      "classType": "London Dry Gin",
+      "alcoholContent": "47%",
+      "netContents": "750 mL",
+      "bottler": "Stone's Throw Spirits Co., Portland, Oregon",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "glen-ardra-blurry",
+    "title": "Scotch — slightly blurry, noisy photo",
+    "note": "Out-of-focus phone photo with sensor noise.",
+    "featured": false,
+    "images": [
+      "glen-ardra-blurry.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Glen Ardra",
+      "classType": "Single Malt Scotch Whisky",
+      "alcoholContent": "43%",
+      "netContents": "750 mL",
+      "bottler": "Highland Imports Inc., Boston, Massachusetts",
+      "countryOfOrigin": "Scotland"
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match",
+        "countryOfOrigin": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "agave-azul-sideways",
+    "title": "Tequila — photo taken sideways",
+    "note": "Image is rotated 90°, as when a phone photo loses its orientation flag.",
+    "featured": false,
+    "images": [
+      "agave-azul-sideways.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Agave Azul",
+      "classType": "Tequila Blanco",
+      "alcoholContent": "40%",
+      "netContents": "750 mL",
+      "bottler": "Azul Imports LLC, San Antonio, Texas",
+      "countryOfOrigin": "Mexico"
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match",
+        "countryOfOrigin": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  },
+  {
+    "id": "island-breeze-small",
+    "title": "Rum — small, low-resolution image",
+    "note": "Only 520 px wide with heavy JPEG compression; the warning text is tiny.",
+    "featured": false,
+    "images": [
+      "island-breeze-small.jpg"
+    ],
+    "application": {
+      "beverageType": "spirits",
+      "brandName": "Island Breeze",
+      "classType": "Spiced Rum",
+      "alcoholContent": "35%",
+      "netContents": "750 mL",
+      "bottler": "Island Breeze Rum Co., Key West, Florida",
+      "countryOfOrigin": ""
+    },
+    "expected": {
+      "overall": "pass",
+      "fields": {
+        "brandName": "match",
+        "classType": "match",
+        "alcoholContent": "match",
+        "netContents": "match",
+        "bottler": "match",
+        "warning": "match"
+      }
+    },
+    "accept": [
+      "review"
+    ]
+  }
+]
