@@ -1,7 +1,6 @@
-// Copies the Tesseract.js runtime out of node_modules into public/ocr-runtime
-// so the app serves it itself. Nothing is fetched from a CDN at run time,
-// which matters on locked-down government networks (see README).
-// (ONNX Runtime's WASM file is bundled by Vite automatically.)
+// Copies the OCR runtimes out of node_modules into public/ocr-runtime so the
+// app serves them itself. Nothing is fetched from a CDN at run time, which
+// matters on locked-down government networks (see README).
 import { cp, mkdir, access } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +10,9 @@ const nm = (...p) => path.join(root, 'node_modules', ...p);
 const out = (...p) => path.join(root, 'public', 'ocr-runtime', ...p);
 
 const files = [
+  // ONNX Runtime Web (runs the PaddleOCR models): glue code + SIMD/threads WASM.
+  [nm('onnxruntime-web/dist/ort-wasm-simd-threaded.mjs'), out('ort/ort-wasm-simd-threaded.mjs')],
+  [nm('onnxruntime-web/dist/ort-wasm-simd-threaded.wasm'), out('ort/ort-wasm-simd-threaded.wasm')],
   // Tesseract.js worker, WASM cores (the browser picks one) and English LSTM model.
   [nm('tesseract.js/dist/worker.min.js'), out('tesseract/worker.min.js')],
   [nm('tesseract.js-core/tesseract-core-relaxedsimd-lstm.wasm.js'), out('tesseract/core/tesseract-core-relaxedsimd-lstm.wasm.js')],

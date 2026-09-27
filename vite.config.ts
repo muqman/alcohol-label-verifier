@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -6,6 +7,14 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: './',
   plugins: [react()],
+  resolve: {
+    alias: {
+      // ONNX Runtime's plain (non-bundled) WASM build: it loads its glue code and
+      // .wasm from `wasmPaths` (public/ocr-runtime/ort/), so its WebAssembly
+      // threads can start when the host enables cross-origin isolation.
+      'onnxruntime-web/wasm': fileURLToPath(new URL('./node_modules/onnxruntime-web/dist/ort.wasm.min.mjs', import.meta.url)),
+    },
+  },
   worker: { format: 'es' },
   optimizeDeps: { exclude: ['onnxruntime-web'] },
   build: { target: 'es2022', chunkSizeWarningLimit: 1500 },

@@ -1,0 +1,7 @@
+# Netlify / Cloudflare Pages: cross-origin isolation lets ONNX Runtime use
+# WebAssembly threads (faster second look). Azure uses staticwebapp.config.json.
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer

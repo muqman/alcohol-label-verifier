@@ -1,0 +1,71 @@
+# Test, build and publish to GitHub Pages on every push to main.
+# One-time setup: repository Settings -> Pages -> Build and deployment ->
+# Source: "GitHub Actions".
+name: Test and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Type-check and build
+        run: npm run build
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  # Accuracy on the sample and held-out labels, and a real-browser run of the
+  # built app. Reported separately so it never blocks a deployment.
+  quality:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Accuracy on built-in examples
+        run: npm run eval
+      - name: Accuracy on held-out labels
+        run: npm run eval -- --holdout
+      - name: End-to-end test in Chromium
+        run: |
+          npx playwright install --with-deps chromium
+          npm run build
+          npm run test:e2e
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

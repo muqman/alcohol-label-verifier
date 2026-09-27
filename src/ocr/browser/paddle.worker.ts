@@ -7,7 +7,7 @@ import { parseDictionary } from '../paddle/recognize';
 import type { Box, OcrWord } from '../types';
 
 export type PaddleRequest =
-  | { type: 'init'; modelBase: string }
+  | { type: 'init'; ortBase: string; modelBase: string }
   /** Start text detection for an image (can begin before hints are known). */
   | { type: 'detect'; id: number; width: number; height: number; buffer: ArrayBuffer }
   /** Finish a detected image: recognise the lines that still need it. */
@@ -29,7 +29,8 @@ async function fetchBytes(url: string): Promise<Uint8Array> {
   return new Uint8Array(await res.arrayBuffer());
 }
 
-async function init(modelBase: string) {
+async function init(ortBase: string, modelBase: string) {
+  ort.env.wasm.wasmPaths = ortBase;
   ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
   const opts: ort.InferenceSession.SessionOptions = { executionProviders: ['wasm'], graphOptimizationLevel: 'all' };
   const [det, rec, dictText] = await Promise.all([
@@ -48,7 +49,7 @@ scope.onmessage = async (e: MessageEvent<PaddleRequest>) => {
   const msg = e.data;
   if (msg.type === 'init') {
     try {
-      await init(msg.modelBase);
+      await init(msg.ortBase, msg.modelBase);
       scope.postMessage({ type: 'ready' } satisfies PaddleResponse);
     } catch (err) {
       scope.postMessage({ type: 'error', message: String((err as Error)?.message ?? err) } satisfies PaddleResponse);

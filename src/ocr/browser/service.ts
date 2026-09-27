@@ -31,6 +31,11 @@ class PaddleWorker {
   constructor() {
     this.worker = new Worker(new URL('./paddle.worker.ts', import.meta.url), { type: 'module' });
     this.ready = new Promise((resolve, reject) => {
+      // Never wait forever on a worker that failed silently.
+      const timer = setTimeout(() => reject(new Error('The detailed text reader took too long to start')), 90_000);
+      this.worker.addEventListener('message', (e: MessageEvent<PaddleResponse>) => {
+        if (e.data.type === 'ready' || (e.data.type === 'error' && e.data.id === undefined)) clearTimeout(timer);
+      });
       const onInit = (e: MessageEvent<PaddleResponse>) => {
         if (e.data.type === 'ready') resolve();
         else if (e.data.type === 'error' && e.data.id === undefined) reject(new Error(e.data.message));
@@ -45,7 +50,7 @@ class PaddleWorker {
       if (m.type === 'result') this.settle(m.id, m.page);
       else if (m.type === 'error' && m.id !== undefined) this.settle(m.id, undefined, new Error(m.message));
     });
-    const init: PaddleRequest = { type: 'init', modelBase: `${base()}models/paddleocr/` };
+    const init: PaddleRequest = { type: 'init', ortBase: `${base()}ocr-runtime/ort/`, modelBase: `${base()}models/paddleocr/` };
     this.worker.postMessage(init);
   }
 
@@ -78,7 +83,11 @@ class PaddleWorker {
         await sent;
         settled = true;
         return new Promise<OcrPage>((resolve, reject) => {
-          this.pending.set(id, { resolve, reject });
+          const timer = setTimeout(() => this.settle(id, undefined, new Error('The detailed text reader did not answer in time')), 60_000);
+          this.pending.set(id, {
+            resolve: (p) => (clearTimeout(timer), resolve(p)),
+            reject: (e) => (clearTimeout(timer), reject(e)),
+          });
           const msg: PaddleRequest = { type: 'recognize', id, knownWords, trustedRegions };
           this.worker.postMessage(msg);
         });

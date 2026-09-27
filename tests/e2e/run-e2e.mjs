@@ -15,6 +15,9 @@ import { chromium } from 'playwright';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dist = path.join(root, 'dist');
 const shots = process.argv.includes('--screenshots');
+// --isolate: send the cross-origin isolation headers some hosts can add
+// (see public/_headers), which enables multi-threaded ONNX Runtime.
+const isolate = process.argv.includes('--isolate');
 const outDir = path.join(root, 'test-results');
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.wasm': 'application/wasm', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.woff': 'font/woff', '.csv': 'text/csv', '.txt': 'text/plain' };
 
@@ -23,7 +26,9 @@ const server = http.createServer(async (req, res) => {
     let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (p.endsWith('/')) p += 'index.html';
     const body = await readFile(path.join(dist, p));
-    res.writeHead(200, { 'Content-Type': TYPES[path.extname(p)] ?? 'application/octet-stream' });
+    const headers = { 'Content-Type': TYPES[path.extname(p)] ?? 'application/octet-stream' };
+    if (isolate) Object.assign(headers, { 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Embedder-Policy': 'require-corp' });
+    res.writeHead(200, headers);
     res.end(body);
   } catch {
     res.writeHead(404);

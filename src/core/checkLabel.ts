@@ -68,13 +68,19 @@ export async function checkLabel(app: ApplicationData, images: RgbaImage[], ocr:
 
   onStage?.('second-look');
   const deep: OcrPage[] = [];
-  for (let i = 0; i < images.length; i++) {
-    const known = fast[i].lines.flatMap((l) => l.words);
-    // Text behind fields that already matched needs no second reading.
-    const trusted = result.fields.filter((f) => f.status === 'match').flatMap((f) => f.evidence.filter((e) => e.imageIndex === i).map((e) => e.box));
-    const page = early ? await early[i].finish(known, trusted) : await ocr.paddle!(images[i], known, trusted);
-    annotateWarningStrokes(images[i], page);
-    deep.push(page);
+  try {
+    for (let i = 0; i < images.length; i++) {
+      const known = fast[i].lines.flatMap((l) => l.words);
+      // Text behind fields that already matched needs no second reading.
+      const trusted = result.fields.filter((f) => f.status === 'match').flatMap((f) => f.evidence.filter((e) => e.imageIndex === i).map((e) => e.box));
+      const page = early ? await early[i].finish(known, trusted) : await ocr.paddle!(images[i], known, trusted);
+      annotateWarningStrokes(images[i], page);
+      deep.push(page);
+    }
+  } catch {
+    // The second look is an improvement, not a requirement: keep the first result.
+    early?.slice(deep.length + 1).forEach((h) => h.cancel());
+    return { result, readings, secondLook: false, ms: now() - t0 };
   }
   readings = images.map((_, i) => ({ pages: [fast[i], deep[i]] }));
   result = verifyLabel(app, readings);
