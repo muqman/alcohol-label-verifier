@@ -69,15 +69,19 @@ export default function App() {
           ))}
         </div>
       </nav>
-      <main className="shell" id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`}>
+      <main className="shell">
         {/* Keep both tools mounted so switching tabs never loses work. */}
-        <div hidden={tab !== 'single'}>
+        <div role="tabpanel" id="panel-single" aria-labelledby="tab-single" hidden={tab !== 'single'}>
           <SingleCheck service={service} engines={engines} />
         </div>
-        <div hidden={tab !== 'batch'}>
+        <div role="tabpanel" id="panel-batch" aria-labelledby="tab-batch" hidden={tab !== 'batch'}>
           <BatchCheck service={service} engines={engines} />
         </div>
-        {tab === 'about' && <About />}
+        {tab === 'about' && (
+          <div role="tabpanel" id="panel-about" aria-labelledby="tab-about">
+            <About />
+          </div>
+        )}
       </main>
       <footer className="site-footer">
         <div className="shell">

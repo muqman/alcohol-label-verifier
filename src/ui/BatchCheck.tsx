@@ -56,6 +56,7 @@ export function BatchCheck({ service, engines }: Props) {
   const [detail, setDetail] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingSample, setLoadingSample] = useState(false);
+  const [copied, setCopied] = useState(false);
   const stop = useRef(false);
   const imageInput = useRef<HTMLInputElement>(null);
   const csvInput = useRef<HTMLInputElement>(null);
@@ -121,6 +122,18 @@ export function BatchCheck({ service, engines }: Props) {
       setError((e as Error).message);
     } finally {
       setLoadingSample(false);
+    }
+  }
+
+  // Some locked-down browsers block downloads; pasting into Excel always works.
+  async function copyResults() {
+    const tsv = resultsToCsv(results);
+    try {
+      await navigator.clipboard.writeText(tsv);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setError('Copying was blocked by the browser. Use “Download results (CSV)” instead.');
     }
   }
 
@@ -279,6 +292,9 @@ export function BatchCheck({ service, engines }: Props) {
                 <>
                   <button type="button" className="btn" onClick={() => setPhase('setup')}>
                     <IconArrowLeft /> New batch
+                  </button>
+                  <button type="button" className="btn" onClick={() => void copyResults()}>
+                    {copied ? 'Copied' : 'Copy for a spreadsheet'}
                   </button>
                   <button type="button" className="btn primary" onClick={() => download('label-check-results.csv', resultsToCsv(results))}>
                     <IconDownload /> Download results (CSV)
