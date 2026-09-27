@@ -59,7 +59,6 @@ class PaddleWorker {
   }
 
   private settle(id: number, page?: OcrPage, err?: Error) {
-    // (busy is decremented here for finished runs, or in cancel())
     const p = this.pending.get(id);
     if (!p) return;
     this.pending.delete(id);
