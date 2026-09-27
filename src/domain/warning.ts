@@ -83,8 +83,10 @@ function assess(s: Stream): Assessment | null {
     const we = ws + w.key.length;
     // Text inserted between the previous word and this one = added words.
     const between = insertedBefore[ws];
+    let inserted: string | undefined;
     if (wi > 0 && between.length >= 2) {
-      extraText.push(spanText(s, start + Math.min(...between), start + Math.max(...between) + 1));
+      inserted = spanText(s, start + Math.min(...between), start + Math.max(...between) + 1);
+      extraText.push(inserted);
     }
     let errors = 0;
     const positions: number[] = [];
@@ -98,7 +100,7 @@ function assess(s: Stream): Assessment | null {
     }
     const read = positions.length ? spanText(s, start + Math.min(...positions), start + Math.max(...positions) + 1) : undefined;
     if (errors === 0) {
-      words.push({ text: w.text, state: 'ok' });
+      words.push({ text: w.text, state: 'ok', insertedBefore: inserted });
     } else if (!positions.length) {
       // Whole word absent. Omitted mid-line => the label really lacks it;
       // absent across a line break or at the end => maybe a line we could not read.
@@ -108,13 +110,13 @@ function assess(s: Stream): Assessment | null {
       // With nothing read before the gap, the heading is the left neighbour.
       const beforeLine = before >= 0 ? lineAt(before) : header && start > 0 ? s.line[start - 1] : -1;
       const sameLine = beforeLine >= 0 && after >= 0 && beforeLine === lineAt(after);
-      words.push({ text: w.text, state: sameLine ? 'missing' : 'unread' });
+      words.push({ text: w.text, state: sameLine ? 'missing' : 'unread', insertedBefore: inserted });
     } else if (errors <= Math.max(1.5, w.key.length / 2)) {
       // Up to half the letters off is what misreading looks like
       // ("alcohoic", "abxdity"); a person should glance at it.
-      words.push({ text: w.text, state: 'unclear', read });
+      words.push({ text: w.text, state: 'unclear', read, insertedBefore: inserted });
     } else {
-      words.push({ text: w.text, state: 'changed', read });
+      words.push({ text: w.text, state: 'changed', read, insertedBefore: inserted });
     }
   });
   // Words appended after the last official word are not part of the statement
@@ -243,6 +245,7 @@ export function checkWarning(streams: Stream[]): FieldResult {
     boldRatio: ratio,
     words: best.words,
     extraText: best.extraText,
+    readQuality: poorRead ? 'poor' : 'good',
     readText: tidy(candidate.text),
   };
   const message =

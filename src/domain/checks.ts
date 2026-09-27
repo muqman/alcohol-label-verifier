@@ -1,8 +1,8 @@
 // Field-by-field comparison of label text against the application.
 import { approxSearch } from './fuzzy';
 import { countryVariants, isDomestic, stateVariants } from './places';
-import { candidateLines, candidateLineText, evidenceFor, findAll, findBest, lineEvidence, type Candidate } from './search';
-import { buildStream, type Stream } from './stream';
+import { candidateLines, candidateLineText, evidenceFor, findAll, findBest, lineEvidence, unionBox, type Candidate } from './search';
+import { buildStream, wordRanges, type Stream } from './stream';
 import { fold, key, tidy } from './text';
 import type { ApplicationData, Evidence, FieldResult, FieldStatus } from './types';
 import { findAbv, findProof, findVolumes, formatNumber, parseExpectedAbv, parseExpectedVolume, sameVolume } from './units';
@@ -180,7 +180,7 @@ export function checkBottler(app: ApplicationData, streams: Stream[]): FieldResu
     status = 'review';
     message = `Name matches, but ${missingParts.map(quote).join(' and ')} was not found next to it. Label reads ${quote(foundText)}.`;
   } else if (status === 'match') {
-    message = `Matches. Label reads ${quote(foundText)}.`;
+    message = 'Matches the application.';
   } else if (status === 'missing') {
     return { ...base, status, found: null, message: `Could not find ${quote(name)} on the label.`, evidence: [] };
   } else {
@@ -250,7 +250,7 @@ export function checkCountry(app: ApplicationData, streams: Stream[]): FieldResu
     ...base,
     status,
     found: lineText,
-    message: status === 'match' ? `Matches. Label reads ${quote(lineText)}.` : `Possibly ${quote(expected)}: the label appears to say ${quote(best!.text)}.`,
+    message: status === 'match' ? 'Matches the application.' : `Possibly ${quote(expected)}: the label appears to say ${quote(best!.text)}.`,
     evidence: evidenceFor(best!),
   };
 }
@@ -263,6 +263,21 @@ interface Found<T> {
   stream: Stream;
   line: number;
   conf: number;
+}
+
+/** Evidence box around just the words of a statement within a line. */
+function statementEvidence(s: Stream, li: number, index: number, length: number): Evidence {
+  const line = s.page.lines[li];
+  const ranges = wordRanges(line.text);
+  const boxes = ranges.length === line.words.length ? line.words.filter((_, wi) => ranges[wi][0] < index + length && ranges[wi][1] > index).map((w) => w.box) : [];
+  return { imageIndex: s.imageIndex, engine: s.page.engine, box: boxes.length ? unionBox(boxes) : line.box };
+}
+
+/** The alcohol statement without other statements that share its line (e.g. "750 mL"). */
+function abvText(line: string): string {
+  let out = line;
+  for (const v of findVolumes(line)) out = out.replace(v.text, ' ');
+  return tidy(out.replace(/[~|]+/g, ' '));
 }
 
 export function checkAlcohol(app: ApplicationData, streams: Stream[]): FieldResult {
@@ -295,8 +310,8 @@ export function checkAlcohol(app: ApplicationData, streams: Stream[]): FieldResu
   const labelLine = (f: Found<unknown>) => tidy(f.stream.page.lines[f.line].text);
 
   if (hit) {
-    const found = labelLine(hit);
-    const evidence = [lineEvidence(hit.stream, hit.line)];
+    const found = hit.value.text || abvText(labelLine(hit));
+    const evidence = [statementEvidence(hit.stream, hit.line, hit.value.index, hit.value.length)];
     const notes: string[] = [];
     let status: FieldStatus = 'match';
     const labelProofs = [...new Set(proofs.map((p) => p.value))];
@@ -316,7 +331,7 @@ export function checkAlcohol(app: ApplicationData, streams: Stream[]): FieldResu
       ...base,
       status,
       found,
-      message: status === 'match' ? `Matches. Label reads ${quote(found)}.` : `The number matches (${formatNumber(want)}%), but ${notes.join('; ')}.`,
+      message: status === 'match' ? 'Matches the application.' : `The number matches (${formatNumber(want)}%), but ${notes.join('; ')}.`,
       evidence,
     };
   }
@@ -326,9 +341,9 @@ export function checkAlcohol(app: ApplicationData, streams: Stream[]): FieldResu
     return {
       ...base,
       status,
-      found: labelLine(f),
-      message: `${status === 'mismatch' ? 'Does not match' : 'Possibly different'}: the label says ${formatNumber(f.value.abv)}% (${quote(labelLine(f))}), the application says ${formatNumber(want)}%.`,
-      evidence: [lineEvidence(f.stream, f.line)],
+      found: f.value.text || abvText(labelLine(f)),
+      message: `${status === 'mismatch' ? 'Does not match' : 'Possibly different'}: the label says ${formatNumber(f.value.abv)}%, the application says ${formatNumber(want)}%.`,
+      evidence: [statementEvidence(f.stream, f.line, f.value.index, f.value.length)],
     };
   }
   return { ...base, status: 'missing', found: null, message: 'No alcohol content statement found on the label.', evidence: [] };
@@ -357,12 +372,12 @@ export function checkNetContents(app: ApplicationData, streams: Stream[]): Field
     const anyUs = found.some((f) => f.value.us);
     const anyMetric = found.some((f) => !f.value.us);
     if (app.beverageType === 'beer' && !anyUs) {
-      return { ...base, status: 'review', found: text, message: `Amount matches (${quote(text)}), but malt beverages must state net contents in U.S. units (e.g. “12 FL OZ”).`, evidence: [lineEvidence(hit.stream, hit.line)] };
+      return { ...base, status: 'review', found: text, message: `Amount matches (${quote(text)}), but malt beverages must state net contents in U.S. units (e.g. “12 FL OZ”).`, evidence: [statementEvidence(hit.stream, hit.line, hit.value.index, hit.value.length)] };
     }
     if (app.beverageType !== 'beer' && !anyMetric) {
-      return { ...base, status: 'review', found: text, message: `Amount matches (${quote(text)}), but wine and spirits must state net contents in metric units (mL or L).`, evidence: [lineEvidence(hit.stream, hit.line)] };
+      return { ...base, status: 'review', found: text, message: `Amount matches (${quote(text)}), but wine and spirits must state net contents in metric units (mL or L).`, evidence: [statementEvidence(hit.stream, hit.line, hit.value.index, hit.value.length)] };
     }
-    return { ...base, status: 'match', found: text, message: `Matches. Label reads ${quote(text)}.`, evidence: [lineEvidence(hit.stream, hit.line)] };
+    return { ...base, status: 'match', found: text, message: 'Matches the application.', evidence: [statementEvidence(hit.stream, hit.line, hit.value.index, hit.value.length)] };
   }
   if (found.length) {
     const f = found.reduce((a, b) => (b.conf > a.conf ? b : a));
@@ -372,7 +387,7 @@ export function checkNetContents(app: ApplicationData, streams: Stream[]): Field
       status,
       found: f.value.text,
       message: `${status === 'mismatch' ? 'Does not match' : 'Possibly different'}: the label says ${quote(f.value.text)}, the application says ${quote(expectedText)}.`,
-      evidence: [lineEvidence(f.stream, f.line)],
+      evidence: [statementEvidence(f.stream, f.line, f.value.index, f.value.length)],
     };
   }
   return { ...base, status: 'missing', found: null, message: 'No net contents statement found on the label.', evidence: [] };

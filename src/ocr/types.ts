@@ -49,6 +49,8 @@ export interface OcrPage {
   rotation: 0 | 90 | 180 | 270;
   /** Wall-clock time spent by the engine, in milliseconds. */
   ms: number;
+  /** Optional diagnostics (timings, how many lines were recognised). */
+  stats?: Record<string, number>;
 }
 
 /** Plain RGBA pixel buffer (same layout as the DOM ImageData). */

@@ -12,7 +12,7 @@ import { runPaddleOcr, type PaddleModels } from '../../src/ocr/paddle/pipeline';
 import { parseDictionary } from '../../src/ocr/paddle/recognize';
 import { workingSize } from '../../src/ocr/prepare';
 import { tesseractToPage } from '../../src/ocr/tesseract/convert';
-import type { OcrWord, RgbaImage } from '../../src/ocr/types';
+import type { Box, OcrWord, RgbaImage } from '../../src/ocr/types';
 
 const root = path.resolve(import.meta.dirname, '../..');
 
@@ -36,8 +36,8 @@ export async function paddleModels(): Promise<PaddleModels> {
   return models;
 }
 
-export async function paddleOcr(img: RgbaImage, knownWords: OcrWord[] = []) {
-  return runPaddleOcr(ort, await paddleModels(), img, { knownWords });
+export async function paddleOcr(img: RgbaImage, knownWords: OcrWord[] = [], trustedRegions: Box[] = []) {
+  return runPaddleOcr(ort, await paddleModels(), img, { knownWords, trustedRegions });
 }
 
 let worker: Promise<Worker> | null = null;

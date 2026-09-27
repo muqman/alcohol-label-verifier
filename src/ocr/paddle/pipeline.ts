@@ -23,19 +23,30 @@ export interface PaddleOptions {
    * again, which saves most of the recognition time on typical labels.
    */
   knownWords?: OcrWord[];
+  /**
+   * Regions whose text the first engine already verified against the
+   * application. Lines inside them reuse the known words even when those
+   * words' confidence is modest, so the slow recogniser focuses on the rest.
+   */
+  trustedRegions?: Box[];
 }
 
 const KNOWN_MIN_CONF = 0.85;
 
-/** Confident known words whose centre lies inside the quad, left to right. */
-function reusableWords(quad: Quad, known: OcrWord[]): OcrWord[] | null {
+const inBox = (x: number, y: number, b: Box, pad = 0) => x >= b.x - pad && x <= b.x + b.w + pad && y >= b.y - pad && y <= b.y + b.h + pad;
+
+/** Known words whose centre lies inside the quad, left to right, if they can stand in for it. */
+function reusableWords(quad: Quad, known: OcrWord[], trusted: Box[]): OcrWord[] | null {
   const xs = quad.map((p) => p.x), ys = quad.map((p) => p.y);
   const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
   const inside = known.filter((w) => {
     const cx = w.box.x + w.box.w / 2, cy = w.box.y + w.box.h / 2;
     return cx >= x0 && cx <= x1 && cy >= y0 && cy <= y1;
   });
-  if (!inside.length || inside.some((w) => w.conf < KNOWN_MIN_CONF)) return null;
+  if (!inside.length) return null;
+  // Each word must be either confidently read or part of already-verified text.
+  const ok = (w: OcrWord) => w.conf >= KNOWN_MIN_CONF || trusted.some((b) => inBox(w.box.x + w.box.w / 2, w.box.y + w.box.h / 2, b, 2));
+  if (!inside.every(ok)) return null;
   const alnum = inside.map((w) => w.text).join('').replace(/[^A-Za-z0-9]/g, '').length;
   if (alnum < 2) return null;
   // The known words must fill the line: no big uncovered stretch at either
@@ -75,69 +86,101 @@ function meanConf(results: RecResult[]): number {
 const largest = (dets: DetectedBox[], k: number) =>
   [...dets].sort((a, b) => quadW(b.quad) * quadH(b.quad) - quadW(a.quad) * quadH(a.quad)).slice(0, k);
 
-export async function runPaddleOcr(ort: Ort, models: PaddleModels, original: RgbaImage, options: PaddleOptions = {}): Promise<OcrPage> {
-  const t0 = now();
-  const detOpt = { ...DEFAULT_DET, ...options.det };
-  let rotation: 0 | 90 | 180 | 270 = 0;
-  let img = original;
-  let dets = await detectText(ort, models.det, img, detOpt);
+/** Result of the detection phase, kept so recognition can run later. */
+export interface Detection {
+  original: RgbaImage;
+  /** The image in upright orientation (== original unless rotated). */
+  img: RgbaImage;
+  rotation: 0 | 90 | 180 | 270;
+  dets: DetectedBox[];
+  stats: Record<string, number>;
+  t0: number;
+}
 
-  // --- Sideways photo? Most text regions are tall and thin. ---------------
+/**
+ * Phase 1: find text lines and settle the page orientation. This does not
+ * depend on the other engine's results, so it can start early in parallel.
+ */
+export async function detectPhase(ort: Ort, models: PaddleModels, original: RgbaImage, det: Partial<DetOptions> = {}): Promise<Detection> {
+  const t0 = now();
+  const stats: Record<string, number> = { detMs: 0, recMs: 0, linesRead: 0, linesReused: 0 };
+  const detOpt = { ...DEFAULT_DET, ...det };
+  let rotation: Detection['rotation'] = 0;
+  let img = original;
+  let s0 = now();
+  let dets = await detectText(ort, models.det, img, detOpt);
+  stats.detMs += now() - s0;
+
+  // Sideways photo? Most text regions are tall and thin.
   const area = (d: DetectedBox) => quadW(d.quad) * quadH(d.quad);
   const vertical = dets.filter((d) => quadH(d.quad) > 1.5 * quadW(d.quad));
-  const totalArea = dets.reduce((s, d) => s + area(d), 0);
-  if (vertical.length >= 2 && vertical.reduce((s, d) => s + area(d), 0) > 0.5 * totalArea) {
+  const totalArea = dets.reduce((sum, d) => sum + area(d), 0);
+  if (vertical.length >= 2 && vertical.reduce((sum, d) => sum + area(d), 0) > 0.5 * totalArea) {
     const probe = largest(vertical, 6);
     const down = await recognizeLines(ort, models.rec, img, probe.map((d) => readTopToBottom(d.quad)), models.dict);
     const up = await recognizeLines(ort, models.rec, img, probe.map((d) => readBottomToTop(d.quad)), models.dict);
     rotation = meanConf(down) >= meanConf(up) ? 270 : 90;
     img = rotate(original, rotation);
+    s0 = now();
     dets = await detectText(ort, models.det, img, detOpt);
+    stats.detMs += now() - s0;
   }
+  return { original, img, rotation, dets, stats, t0 };
+}
 
-  // Reuse lines another engine already read with confidence (upright images only,
-  // since the known word boxes are in the original orientation).
+/** Phase 2: recognise the lines (reusing what the other engine verified) and build the page. */
+export async function recognizePhase(ort: Ort, models: PaddleModels, d: Detection, options: PaddleOptions = {}): Promise<OcrPage> {
+  const { original, stats } = d;
+  let { img, rotation, dets } = d;
+  const detOpt = { ...DEFAULT_DET, ...options.det };
+
+  // Reuse lines another engine already read (upright images only, since the
+  // known word boxes are in the original orientation).
   const reused = new Map<number, OcrWord[]>();
   if (rotation === 0 && options.knownWords?.length) {
-    dets.forEach((d, i) => {
-      const words = reusableWords(d.quad, options.knownWords!);
+    dets.forEach((det, i) => {
+      const words = reusableWords(det.quad, options.knownWords!, options.trustedRegions ?? []);
       if (words) reused.set(i, words);
     });
   }
   const toRead = dets.map((_, i) => i).filter((i) => !reused.has(i));
+  const s0 = now();
   const read = await recognizeLines(ort, models.rec, img, toRead.map((i) => dets[i].quad), models.dict);
+  stats.recMs += now() - s0;
+  stats.linesRead = toRead.length;
+  stats.linesReused = reused.size;
   let recs: (RecResult | undefined)[] = [];
   toRead.forEach((di, k) => (recs[di] = read[k]));
 
-  // --- Upside down? Low confidence that improves when flipped. -------------
+  // Upside down? Low confidence that improves when flipped.
   if (dets.length && read.length >= 3 && meanConf(read) < 0.75) {
     const probe = largest(dets, 6);
-    const asIs = await recognizeLines(ort, models.rec, img, probe.map((d) => d.quad), models.dict);
-    const flipped = await recognizeLines(ort, models.rec, img, probe.map((d) => upsideDown(d.quad)), models.dict);
+    const asIs = await recognizeLines(ort, models.rec, img, probe.map((x) => x.quad), models.dict);
+    const flipped = await recognizeLines(ort, models.rec, img, probe.map((x) => upsideDown(x.quad)), models.dict);
     if (meanConf(flipped) > meanConf(asIs) + 0.1) {
-      rotation = ((rotation + 180) % 360) as 0 | 90 | 180 | 270;
+      rotation = ((rotation + 180) % 360) as Detection['rotation'];
       img = rotate(original, rotation);
       dets = await detectText(ort, models.det, img, detOpt);
       reused.clear();
-      recs = await recognizeLines(ort, models.rec, img, dets.map((d) => d.quad), models.dict);
+      recs = await recognizeLines(ort, models.rec, img, dets.map((x) => x.quad), models.dict);
     }
   }
 
-  // --- Build lines (in the upright frame), then order them. ----------------
+  // Build lines in the upright frame, then order them.
   const upright: { quad: Quad; rec: RecResult; known?: OcrWord[] }[] = [];
-  dets.forEach((d, i) => {
+  dets.forEach((det, i) => {
     const known = reused.get(i);
     if (known) {
       const text = known.map((w) => w.text).join(' ');
-      const conf = known.reduce((s, w) => s + w.conf, 0) / known.length;
-      upright.push({ quad: d.quad, rec: { text, conf, chars: [] }, known });
+      const conf = known.reduce((sum, w) => sum + w.conf, 0) / known.length;
+      upright.push({ quad: det.quad, rec: { text, conf, chars: [] }, known });
       return;
     }
     const r = recs[i];
     if (!r || !r.text.trim()) return;
     if (r.conf < 0.45) return; // graphics and texture mis-detected as text
     if (r.text.replace(/\s/g, '').length === 1 && r.conf < 0.8) return;
-    upright.push({ quad: d.quad, rec: r });
+    upright.push({ quad: det.quad, rec: r });
   });
   const ordered = readingOrder(upright);
 
@@ -160,7 +203,11 @@ export async function runPaddleOcr(ort: Ort, models: PaddleModels, original: Rgb
     words: known ?? splitWords(quad, rec, boundsOf),
   }));
 
-  return { engine: 'paddle', width: original.width, height: original.height, lines, rotation, ms: now() - t0 };
+  return { engine: 'paddle', width: original.width, height: original.height, lines, rotation, ms: now() - d.t0, stats };
+}
+
+export async function runPaddleOcr(ort: Ort, models: PaddleModels, original: RgbaImage, options: PaddleOptions = {}): Promise<OcrPage> {
+  return recognizePhase(ort, models, await detectPhase(ort, models, original, options.det), options);
 }
 
 /** Split a recognised line into words, locating each from CTC positions. */

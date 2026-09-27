@@ -10,11 +10,26 @@
 import { verifyLabel } from '../domain/verify';
 import type { ApplicationData, ImageReading, VerificationResult } from '../domain/types';
 import { annotateWarningStrokes } from '../ocr/strokes';
-import type { OcrPage, OcrWord, RgbaImage } from '../ocr/types';
+import type { Box, OcrPage, OcrWord, RgbaImage } from '../ocr/types';
+
+/** A deep-engine run whose text detection has already started. */
+export interface DeepHandle {
+  finish(knownWords: OcrWord[], trustedRegions: Box[]): Promise<OcrPage>;
+  cancel(): void;
+}
 
 export interface OcrBackends {
   tesseract(img: RgbaImage): Promise<OcrPage>;
-  paddle(img: RgbaImage, knownWords: OcrWord[]): Promise<OcrPage>;
+  /** Optional deeper engine for the second look. */
+  paddle?(img: RgbaImage, knownWords: OcrWord[], trustedRegions: Box[]): Promise<OcrPage>;
+  /** Optionally start the deeper engine's text detection early, in parallel. */
+  paddleEarly?(img: RgbaImage): DeepHandle;
+}
+
+export interface CheckOptions {
+  onStage?: (stage: Stage) => void;
+  /** Start the second engine's detection alongside the first pass (multi-core machines). */
+  speculate?: boolean;
 }
 
 export interface LabelCheck {
@@ -31,25 +46,33 @@ const now = () => (typeof performance !== 'undefined' ? performance.now() : Date
 
 export const needsSecondLook = (r: VerificationResult) => r.fields.some((f) => f.status !== 'match' && f.status !== 'skipped');
 
-export async function checkLabel(
-  app: ApplicationData,
-  images: RgbaImage[],
-  ocr: OcrBackends,
-  onStage?: (stage: Stage) => void,
-): Promise<LabelCheck> {
+export async function checkLabel(app: ApplicationData, images: RgbaImage[], ocr: OcrBackends, options: CheckOptions = {}): Promise<LabelCheck> {
+  const { onStage } = options;
   const t0 = now();
   onStage?.('reading');
-  const fast = await Promise.all(images.map((img) => ocr.tesseract(img)));
+  const early = options.speculate && ocr.paddleEarly ? images.map((img) => ocr.paddleEarly!(img)) : null;
+  let fast: OcrPage[];
+  try {
+    fast = await Promise.all(images.map((img) => ocr.tesseract(img)));
+  } catch (e) {
+    early?.forEach((h) => h.cancel());
+    throw e;
+  }
   fast.forEach((page, i) => annotateWarningStrokes(images[i], page));
   let readings: ImageReading[] = fast.map((page) => ({ pages: [page] }));
   let result = verifyLabel(app, readings);
-  if (!needsSecondLook(result)) return { result, readings, secondLook: false, ms: now() - t0 };
+  if (!needsSecondLook(result) || (!ocr.paddle && !early)) {
+    early?.forEach((h) => h.cancel());
+    return { result, readings, secondLook: false, ms: now() - t0 };
+  }
 
   onStage?.('second-look');
   const deep: OcrPage[] = [];
   for (let i = 0; i < images.length; i++) {
     const known = fast[i].lines.flatMap((l) => l.words);
-    const page = await ocr.paddle(images[i], known);
+    // Text behind fields that already matched needs no second reading.
+    const trusted = result.fields.filter((f) => f.status === 'match').flatMap((f) => f.evidence.filter((e) => e.imageIndex === i).map((e) => e.box));
+    const page = early ? await early[i].finish(known, trusted) : await ocr.paddle!(images[i], known, trusted);
     annotateWarningStrokes(images[i], page);
     deep.push(page);
   }

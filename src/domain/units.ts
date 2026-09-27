@@ -23,6 +23,9 @@ export interface AbvStatement {
   abv: number;
   /** Text as printed, e.g. "45% Alc./Vol." */
   text: string;
+  /** Position of the statement within the line. */
+  index: number;
+  length: number;
   /** Mentions alcohol/volume ("alc", "vol", "ABV")? */
   hasKeyword: boolean;
 }
@@ -39,11 +42,15 @@ export function findAbv(line: string): AbvStatement[] {
     const after = s.slice(m.index + m[0].length, m.index + m[0].length + 20);
     if (NOT_ABV.test(after)) continue;
     const around = s.slice(Math.max(0, m.index - 16), m.index + m[0].length + 20);
-    out.push({ abv: num(m[1]), text: s.slice(m.index, Math.min(s.length, m.index + m[0].length + 12)).trim(), hasKeyword: ABV_KEYWORD.test(around) });
+    const tail = /^\s*(?:alc(?:ohol)?\.?\s*(?:\/|by)?\s*vol(?:ume)?\.?|abv|by\s*vol(?:ume)?\.?|vol\.?)?(?:\s*\(?\s*\d{2,3}(?:[.,]\d)?\s*°?\s*proof\s*\)?)?/i.exec(s.slice(m.index + m[0].length))![0];
+    const lead = /(?:alc(?:ohol)?\.?\s*(?:by\s*vol(?:ume)?\.?)?\s*:?\s*)$/i.exec(s.slice(0, m.index))?.[0] ?? '';
+    const index = m.index - lead.length;
+    const length = lead.length + m[0].length + tail.length;
+    out.push({ abv: num(m[1]), text: s.slice(index, index + length).trim(), index, length, hasKeyword: ABV_KEYWORD.test(around) });
   }
   // "ABV 6.8" / "6.8 ABV" without a percent sign.
   const re2 = /(?:\babv[:\s]*(\d{1,2}(?:[.,]\d{1,2})?)(?!\s*%))|(?:(\d{1,2}(?:[.,]\d{1,2})?)\s*abv\b)/gi;
-  while ((m = re2.exec(s))) out.push({ abv: num(m[1] ?? m[2]), text: m[0], hasKeyword: true });
+  while ((m = re2.exec(s))) out.push({ abv: num(m[1] ?? m[2]), text: m[0], index: m.index, length: m[0].length, hasKeyword: true });
   return out;
 }
 
@@ -75,6 +82,8 @@ export function parseExpectedAbv(s: string): { abv: number | null; proof: number
 export interface VolumeStatement {
   ml: number;
   text: string;
+  index: number;
+  length: number;
   /** U.S. customary unit (fl oz, pint, quart, gallon)? */
   us: boolean;
 }
@@ -109,12 +118,13 @@ export function findVolumes(line: string): VolumeStatement[] {
     if (!def) continue;
     const amount = parseAmount(m[1]);
     if (!isFinite(amount) || amount <= 0) continue;
-    out.push({ ml: amount * def[1], text: m[0].trim(), us: def[2] });
+    out.push({ ml: amount * def[1], text: m[0].trim(), index: m.index, length: m[0].length, us: def[2] });
   }
   // "1 PINT 8 FL OZ" -> one statement.
   for (let i = 0; i + 1 < out.length; i++) {
     if (/pint|pt/i.test(out[i].text) && /oz|ounce/i.test(out[i + 1].text)) {
-      out.splice(i, 2, { ml: out[i].ml + out[i + 1].ml, text: `${out[i].text} ${out[i + 1].text}`, us: true });
+      const a = out[i], b = out[i + 1];
+      out.splice(i, 2, { ml: a.ml + b.ml, text: `${a.text} ${b.text}`, index: a.index, length: b.index + b.length - a.index, us: true });
     }
   }
   return out;

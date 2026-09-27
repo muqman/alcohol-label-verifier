@@ -78,6 +78,8 @@ export interface WarningWord {
   state: WordState;
   /** What was read instead (for changed/unclear words). */
   read?: string;
+  /** Extra text found on the label just before this word. */
+  insertedBefore?: string;
 }
 
 export interface WarningDetails {
@@ -90,6 +92,8 @@ export interface WarningDetails {
   words: WarningWord[];
   /** Extra words found inside the statement that are not in the official text. */
   extraText: string[];
+  /** 'poor' when the print or photo was too unclear to judge the wording. */
+  readQuality: 'good' | 'poor';
   /** The statement as read from the label (for display). */
   readText: string;
 }
