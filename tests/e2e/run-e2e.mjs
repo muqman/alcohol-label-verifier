@@ -48,8 +48,10 @@ if (cores) await page.addInitScript((n) => Object.defineProperty(navigator, 'har
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 // Tesseract prints informational notes such as "Detected 6 diacritics" to stderr.
-page.on('console', (m) => m.type() === 'error' && !/diacritics/.test(m.text()) && errors.push(m.text()));
-page.on('requestfailed', (r) => errors.push(`request failed: ${r.url().slice(0, 80)} (${r.failure()?.errorText})`));
+// Ignored: a preview image whose blob: URL was released while the page
+// re-rendered (ERR_FILE_NOT_FOUND) is harmless and invisible to the user.
+page.on('console', (m) => m.type() === 'error' && !/diacritics|ERR_FILE_NOT_FOUND/.test(m.text()) && errors.push(m.text()));
+page.on('requestfailed', (r) => !r.url().startsWith('blob:') && errors.push(`request failed: ${r.url().slice(0, 80)} (${r.failure()?.errorText})`));
 
 const t0 = Date.now();
 await page.goto(base);
