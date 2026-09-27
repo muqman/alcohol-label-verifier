@@ -156,7 +156,6 @@ export function BatchCheck({ service, engines }: Props) {
           const decoded = [];
           for (const f of job.files) decoded.push(await service.decode(f));
           const check = await service.check(job.app, decoded);
-          decoded.forEach((d) => URL.revokeObjectURL(d.url));
           done = {
             id: job.id,
             images: job.names,

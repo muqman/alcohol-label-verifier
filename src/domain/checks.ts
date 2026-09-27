@@ -294,8 +294,12 @@ export function checkAlcohol(app: ApplicationData, streams: Stream[]): FieldResu
   const expectedText = app.alcoholContent.trim();
   const base = { key: 'alcoholContent' as const, expected: expectedText };
   if (!expectedText) {
-    const optional = app.beverageType === 'spirits' ? 'Distilled spirits must state alcohol content.' : 'Optional for this beverage type.';
-    return { ...base, status: app.beverageType === 'spirits' ? 'review' : 'skipped', found: null, message: `No alcohol content in the application. ${optional}`, evidence: [] };
+    // Spirits must state alcohol content, so a blank value is worth a look, unless
+    // no application details were entered at all (a warning-only check).
+    const anyDetails = [app.brandName, app.classType, app.netContents, app.bottler, app.countryOfOrigin].some((v) => v.trim());
+    const flag = app.beverageType === 'spirits' && anyDetails;
+    const note = app.beverageType === 'spirits' ? 'Distilled spirits must state alcohol content.' : 'Optional for this beverage type.';
+    return { ...base, status: flag ? 'review' : 'skipped', found: null, message: `No alcohol content in the application. ${note}`, evidence: [] };
   }
   const expected = parseExpectedAbv(expectedText);
   if (expected.abv === null) {

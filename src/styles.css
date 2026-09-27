@@ -380,8 +380,10 @@ table.results td.num { font-variant-numeric: tabular-nums; white-space: nowrap; 
 .prose { max-width: 70ch; display: grid; gap: 14px; }
 .prose h2 { font-size: 1.5rem; margin-top: 10px; }
 .prose ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
-.status-key { display: grid; gap: 10px; }
-.status-key div { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.status-key { display: grid; gap: 12px; }
+.status-key div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: start; }
+.status-key .chip { justify-self: start; }
+@media (max-width: 640px) { .status-key div { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
 
 /* Responsive -------------------------------------------------------------------------------------- */
 @media (max-width: 1000px) {

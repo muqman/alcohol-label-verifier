@@ -4,8 +4,6 @@ import type { RgbaImage } from '../types';
 
 export interface LabelImage {
   name: string;
-  /** Object URL of the original file, for display. */
-  url: string;
   /** Pixels at working resolution (EXIF orientation applied). */
   pixels: RgbaImage;
 }
@@ -38,7 +36,7 @@ export async function decodeImage(file: Blob, name = (file as File).name ?? 'lab
     ctx.fillRect(0, 0, size.width, size.height);
     ctx.drawImage(bitmap, 0, 0, size.width, size.height);
     const data = ctx.getImageData(0, 0, size.width, size.height);
-    return { name, url: URL.createObjectURL(file), pixels: { width: data.width, height: data.height, data: data.data } };
+    return { name, pixels: { width: data.width, height: data.height, data: data.data } };
   } finally {
     bitmap.close();
   }

@@ -41,10 +41,7 @@ export function SingleCheck({ service, engines }: Props) {
     setApp(c.application);
     try {
       const files = await Promise.all(c.images.map(sampleFile));
-      setImages((old) => {
-        old.forEach((i) => URL.revokeObjectURL(i.url));
-        return files.map(pick);
-      });
+      setImages(files.map(pick));
       setPhase('edit');
     } catch (e) {
       setError((e as Error).message);
@@ -78,6 +75,14 @@ export function SingleCheck({ service, engines }: Props) {
     return () => window.removeEventListener('paste', onPaste);
   });
 
+  // Free the memory behind image previews once they are no longer shown.
+  const shownUrls = useRef(new Set<string>());
+  useEffect(() => {
+    const current = new Set(images.map((i) => i.url));
+    for (const u of shownUrls.current) if (!current.has(u)) URL.revokeObjectURL(u);
+    shownUrls.current = current;
+  }, [images]);
+
   useEffect(() => {
     if (phase !== 'checking') return;
     const t0 = performance.now();
@@ -92,15 +97,10 @@ export function SingleCheck({ service, engines }: Props) {
   }
 
   function removeImage(id: string) {
-    setImages((old) => {
-      const gone = old.find((i) => i.id === id);
-      if (gone) URL.revokeObjectURL(gone.url);
-      return old.filter((i) => i.id !== id);
-    });
+    setImages((old) => old.filter((i) => i.id !== id));
   }
 
   function startOver() {
-    images.forEach((i) => URL.revokeObjectURL(i.url));
     setImages([]);
     setApp(EMPTY_APPLICATION);
     setExampleId('');

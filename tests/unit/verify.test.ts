@@ -94,6 +94,11 @@ describe('alcohol content', () => {
     const lines = replaceLine('45% Alc./Vol. (90 Proof) 750 mL', { text: '750 mL', h: 30 });
     expect(status(run(lines), 'alcoholContent')).toBe('missing');
   });
+  it('checks only the warning when no application details are given', () => {
+    const r = run(GOOD_LABEL, { brandName: '', classType: '', alcoholContent: '', netContents: '', bottler: '' });
+    expect(r.fields.filter((f) => f.status !== 'skipped').map((f) => f.key)).toEqual(['warning']);
+    expect(r.verdict).toBe('pass');
+  });
   it('skips when a beer application gives no alcohol content', () => {
     expect(status(run(GOOD_LABEL, { beverageType: 'beer', alcoholContent: '' }), 'alcoholContent')).toBe('skipped');
   });
