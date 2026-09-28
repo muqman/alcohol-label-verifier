@@ -47,12 +47,14 @@ The overall verdict is **All checks passed**, **Needs review** or **Problems fou
 
 ## Run locally
 
-Requirements: Node.js 20.19 or newer.
+Requirements: **Node.js 22.12 or newer** (22 or 24 LTS; check with `node -v`). With nvm or fnm, `nvm use` picks the version in `.nvmrc`.
 
 ```bash
 npm ci
 npm run dev          # http://localhost:5173
 ```
+
+If `npm run dev` stops with a message about the Node.js version or incomplete packages, switch to Node 22 or newer and run `npm ci` again. With an older Node, npm silently skips the build tool's native part for your computer.
 
 | Command | What it does |
 | --- | --- |
