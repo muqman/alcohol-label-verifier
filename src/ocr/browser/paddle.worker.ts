@@ -5,7 +5,7 @@ import * as ort from 'onnxruntime-web/wasm';
 import { detectPhase, recognizePhase, type Detection, type PaddleModels } from '../paddle/pipeline';
 import { parseDictionary } from '../paddle/recognize';
 import type { Box, OcrWord } from '../types';
-import { fetchBinary } from './fetchBinary';
+import { fetchBinary, fetchText } from './fetchBinary';
 
 export type PaddleRequest =
   | { type: 'init'; ortBase: string; modelBase: string }
@@ -32,7 +32,7 @@ async function init(ortBase: string, modelBase: string) {
   const [det, rec, dictText] = await Promise.all([
     fetchBinary(`${modelBase}en_PP-OCRv3_det_infer.onnx`),
     fetchBinary(`${modelBase}en_PP-OCRv4_rec.onnx`),
-    fetch(`${modelBase}en_dict.txt`).then((r) => r.text()),
+    fetchText(`${modelBase}en_dict.txt`),
   ]);
   models = {
     det: await ort.InferenceSession.create(det, opts),

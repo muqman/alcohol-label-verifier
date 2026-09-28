@@ -36,6 +36,3 @@ export const confusable = (a: string, b: string) => a === b || (CONFUSABLE[a] ??
 
 /** Collapse whitespace for display. */
 export const tidy = (s: string) => s.replace(/\s+/g, ' ').trim();
-
-/** True if the two strings differ only in case, spacing or punctuation. */
-export const sameIgnoringFormat = (a: string, b: string) => key(a) === key(b);

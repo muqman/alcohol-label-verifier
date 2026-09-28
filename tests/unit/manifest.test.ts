@@ -34,6 +34,10 @@ describe('batch manifest', () => {
     expect(beverageTypeFrom('Malt beverage')).toBe('beer');
     expect(beverageTypeFrom('Distilled Spirits')).toBe('spirits');
     expect(beverageTypeFrom('WINE')).toBe('wine');
+    expect(beverageTypeFrom('Ginger beer')).toBe('beer');
+    expect(beverageTypeFrom('Malt liquor')).toBe('beer');
+    expect(beverageTypeFrom('London Dry Gin')).toBe('spirits');
+    expect(beverageTypeFrom('Hard cider')).toBe('wine');
     expect(fileKey('C:\\labels\\Old-Tom.JPG')).toBe('old-tom.jpg');
   });
 

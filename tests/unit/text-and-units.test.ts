@@ -47,6 +47,10 @@ describe('alcohol content parsing', () => {
     expect(findAbv('Alc. 13.5% by Vol.')[0]).toMatchObject({ abv: 13.5, hasKeyword: true });
     expect(findAbv('6.8% ALC/VOL')[0]).toMatchObject({ abv: 6.8, hasKeyword: true });
     expect(findAbv('ABV 5.2')[0]).toMatchObject({ abv: 5.2, hasKeyword: true });
+    // "ABV: 12.5%" is 12.5 only; the no-percent pattern must not backtrack to 12.
+    expect(findAbv('ABV: 12.5%').map((s) => s.abv)).toEqual([12.5]);
+    expect(findAbv('ABV 5.2%').map((s) => s.abv)).toEqual([5.2]);
+    expect(findAbv('112 ABV')).toHaveLength(0);
     expect(findAbv('Alcohol 12,5% by volume')[0].abv).toBe(12.5);
   });
   it('ignores percentages that are not alcohol content', () => {

@@ -33,9 +33,11 @@ const norm = (h: string) => h.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').r
 export function beverageTypeFrom(s: string): BeverageType | null {
   const k = s.trim().toLowerCase();
   if (!k) return 'spirits';
-  if (/spirit|liquor|whisk|vodka|gin|rum|tequila|brandy/.test(k)) return 'spirits';
-  if (/wine|sake|cider|mead/.test(k)) return 'wine';
-  if (/beer|malt|ale|lager/.test(k)) return 'beer';
+  // Whole words only: "Ginger beer" is not gin. Malt liquor is a malt beverage.
+  if (/\bmalt\s+(?:beverage|liquor)s?\b/.test(k)) return 'beer';
+  if (/\b(?:spirits?|liquors?|whisk\w*|vodka|gin|rum|tequila|brandy)\b/.test(k)) return 'spirits';
+  if (/\b(?:wines?|sake|ciders?|meads?)\b/.test(k)) return 'wine';
+  if (/\b(?:beers?|malt|ales?|lagers?)\b/.test(k)) return 'beer';
   return null;
 }
 

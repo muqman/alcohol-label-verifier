@@ -48,8 +48,9 @@ export function findAbv(line: string): AbvStatement[] {
     const length = lead.length + m[0].length + tail.length;
     out.push({ abv: num(m[1]), text: s.slice(index, index + length).trim(), index, length, hasKeyword: ABV_KEYWORD.test(around) });
   }
-  // "ABV 6.8" / "6.8 ABV" without a percent sign.
-  const re2 = /(?:\babv[:\s]*(\d{1,2}(?:[.,]\d{1,2})?)(?!\s*%))|(?:(\d{1,2}(?:[.,]\d{1,2})?)\s*abv\b)/gi;
+  // "ABV 6.8" / "6.8 ABV" without a percent sign. The lookarounds stop the
+  // regex from backtracking: "ABV: 12.5%" must not also yield 12.
+  const re2 = /(?:\babv[:\s]*(\d{1,2}(?:[.,]\d{1,2})?)(?![.,]?\d|\s*%))|(?:(?<![\d.,])(\d{1,2}(?:[.,]\d{1,2})?)\s*abv\b)/gi;
   while ((m = re2.exec(s))) out.push({ abv: num(m[1] ?? m[2]), text: m[0], index: m.index, length: m[0].length, hasKeyword: true });
   return out;
 }

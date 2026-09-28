@@ -12,7 +12,7 @@ export interface Box {
 
 /** Stroke-thickness measurement for a word, used to judge bold type. */
 export interface StrokeStats {
-  /** Typical stroke width in pixels (median ink run length). */
+  /** Estimated stroke width in pixels: 2 × ink area ÷ edge crossings (see strokes.ts). */
   width: number;
   /** Height of the inked area in pixels, used to normalise the width. */
   inkHeight: number;

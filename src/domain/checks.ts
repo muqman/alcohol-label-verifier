@@ -36,7 +36,9 @@ function textMessage(status: FieldStatus, expected: string, c: Candidate | null,
   switch (status) {
     case 'match':
       if (c && tidy(fold(c.text)) !== tidy(fold(expected))) {
-        return `Matches. The label writes it as ${quote(c.text)} — same wording, different capitalization or punctuation.`;
+        if (key(c.text) === key(expected)) return `Matches. The label writes it as ${quote(c.text)} — same wording, different capitalization or punctuation.`;
+        if (c.confusableOnly) return `Matches. Read as ${quote(c.text)}; the only differences are characters the text reader often confuses, such as 0 and O.`;
+        return `Matches. The label writes it as ${quote(c.text)}, an accepted spelling of the same wording.`;
       }
       return 'Matches the application.';
     case 'review':
