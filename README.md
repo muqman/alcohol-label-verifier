@@ -2,7 +2,7 @@
 
 A prototype that checks an alcohol beverage label image against the data in its application: brand name, class/type, alcohol content, net contents, bottler, country of origin and the government health warning. It runs entirely in the web browser. Label images are never uploaded, no API keys are needed, and it works on networks that block cloud AI services.
 
-**Live demo:** https://YOUR-GITHUB-USERNAME.github.io/alcohol-label-verifier/ *(set up in minutes, see [Deploy](#deploy))*
+**Live demo:** https://YOUR-GITHUB-USERNAME.github.io/alcohol-label-verifier/
 
 | One label | Warning check | Batch |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ A prototype that checks an alcohol beverage label image against the data in its 
 - [Assumptions](#assumptions)
 - [Limitations and next steps](#limitations-and-next-steps)
 - [Project layout](#project-layout)
-- [Third-party software](#third-party-software)
+- [Tools used](#tools-used)
 
 ## Try it
 
@@ -73,11 +73,11 @@ If `npm run dev` stops with a message about the Node.js version or incomplete pa
 
 1. Create an empty GitHub repository named `alcohol-label-verifier`, then push this project to it:
    ```bash
-   git remote add origin https://github.com/YOUR-GITHUB-USERNAME/alcohol-label-verifier.git
+   git remote add origin https://github.com/<your-username>/alcohol-label-verifier.git
    git push -u origin main
    ```
 2. In the repository open **Settings → Pages**. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. The **Test and deploy** workflow (`.github/workflows/deploy.yml`) runs the unit tests, builds, and publishes. The site appears at `https://YOUR-GITHUB-USERNAME.github.io/alcohol-label-verifier/`. If the first run finished before Pages was enabled, open **Actions** and use **Re-run all jobs**.
+3. The **Test and deploy** workflow (`.github/workflows/deploy.yml`) runs the unit tests, builds, and publishes. The site appears at `https://<your-username>.github.io/alcohol-label-verifier/`. If the first run finished before Pages was enabled, open **Actions** and use **Re-run all jobs**.
 
 The same workflow also runs the accuracy evaluation and the browser end-to-end test in a separate job, so they never block a deployment.
 
@@ -226,14 +226,19 @@ test-data/holdout/     held-out evaluation labels
 
 **Stack:** TypeScript, React 19, Vite. OCR by Tesseract.js 7 and PaddleOCR (PP-OCRv3 detection, PP-OCRv4 recognition) on ONNX Runtime Web 1.30. Tests use Vitest and Playwright.
 
-## Third-party software
+## Tools used
 
-| Component | License |
-| --- | --- |
-| [Tesseract.js](https://github.com/naptha/tesseract.js), Tesseract English LSTM model | Apache-2.0 |
-| [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) models, ONNX conversion by [RapidOCR](https://github.com/RapidAI/RapidOCR) | Apache-2.0 |
-| [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) | MIT |
-| React, Papa Parse | MIT |
-| Public Sans, Source Serif 4 (UI); Google Fonts families used only to render the sample labels | SIL Open Font License |
+| Purpose | Tool | License |
+| --- | --- | --- |
+| Language and user interface | TypeScript 5.9, React 19 | Apache-2.0, MIT |
+| Development server and build | Vite 8 | MIT |
+| Fast OCR (first reading) | [Tesseract.js](https://github.com/naptha/tesseract.js) 7 with the Tesseract English LSTM model | Apache-2.0 |
+| Second-look OCR | [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) PP-OCRv3 detection and PP-OCRv4 recognition models (ONNX conversion by [RapidOCR](https://github.com/RapidAI/RapidOCR)), run on [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) 1.30 | Apache-2.0, MIT |
+| Batch CSV parsing | Papa Parse | MIT |
+| Unit tests | Vitest | MIT |
+| Browser end-to-end test, sample label rendering | Playwright (Chromium) | Apache-2.0 |
+| Image decoding for the command-line evaluation | sharp | Apache-2.0 |
+| Continuous integration and hosting | GitHub Actions, GitHub Pages | – |
+| Fonts | Public Sans, Source Serif 4 (UI); Google Fonts families used only to render the sample labels | SIL Open Font License |
 
 This is a prototype for evaluation. It is not an official government system and is not affiliated with TTB.
