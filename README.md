@@ -2,7 +2,7 @@
 
 A prototype that checks an alcohol beverage label image against the data in its application: brand name, class/type, alcohol content, net contents, bottler, country of origin and the government health warning. It runs entirely in the web browser. Label images are never uploaded, no API keys are needed, and it works on networks that block cloud AI services.
 
-**Live demo:** https://YOUR-GITHUB-USERNAME.github.io/alcohol-label-verifier/
+**Live demo:** https://muqman.github.io/alcohol-label-verifier/
 
 | One label | Warning check | Batch |
 | --- | --- | --- |
@@ -93,14 +93,14 @@ The same workflow also runs the accuracy evaluation and the browser end-to-end t
 
 ```mermaid
 flowchart LR
-  A[Label image(s)] --> B[Decode in browser<br/>EXIF rotation, resize]
-  B --> C[First reading<br/>Tesseract.js ~1 s]
-  C --> D{Compare with<br/>application}
-  D -- everything matches --> R[Result]
-  D -- anything unclear --> E[Second look<br/>PaddleOCR neural nets]
-  E --> F{Compare again,<br/>best evidence wins}
+  A["Label image(s)"] --> B["Decode in browser<br/>EXIF rotation, resize"]
+  B --> C["First reading<br/>Tesseract.js, about 1 s"]
+  C --> D{"Compare with<br/>application"}
+  D -- "everything matches" --> R["Result"]
+  D -- "anything unclear" --> E["Second look<br/>PaddleOCR neural nets"]
+  E --> F{"Compare again,<br/>best evidence wins"}
   F --> R
-  B -. on multi-core machines .-> E
+  B -. "on multi-core machines" .-> E
 ```
 
 1. **Read.** Tesseract.js reads the label, which takes about a second for typical label artwork. Most clean labels are fully verified here.
